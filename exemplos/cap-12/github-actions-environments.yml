@@ -1,0 +1,21 @@
+# exemplos/cap-12/github-actions-environments.yml
+jobs:
+  deploy-staging:
+    runs-on: ubuntu-latest
+    environment: staging        # environment sem aprovação obrigatória
+    needs: validacao
+    steps:
+      - name: Deploy staging
+        run: ./scripts/deploy-staging.sh
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY_STAGING }}
+
+  deploy-producao:
+    runs-on: ubuntu-latest
+    environment: producao       # environment com aprovação obrigatória
+    needs: deploy-staging
+    steps:
+      - name: Deploy produção
+        run: ./scripts/deploy-producao.sh
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}

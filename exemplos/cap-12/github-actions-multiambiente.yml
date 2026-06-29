@@ -1,0 +1,46 @@
+# exemplos/cap-12/github-actions-multiambiente.yml
+name: CI/CD Multi-Ambiente
+
+on:
+  push:
+    branches: ["**"]          # qualquer branch
+    tags: ["v*.*.*"]          # tags de versão
+  pull_request:
+    branches: [main]
+
+jobs:
+  validacao:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+      - run: pip install -r requirements.txt
+      - run: ruff check . && mypy . --ignore-missing-imports
+      - run: pytest tests/unit -v
+
+  deploy-staging:
+    needs: validacao
+    runs-on: ubuntu-latest
+    environment: staging
+    # Só roda em merge para main (não em PRs, não em tags)
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./scripts/deploy-staging.sh ${{ github.sha }}
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY_STAGING }}
+
+  deploy-producao:
+    needs: validacao
+    runs-on: ubuntu-latest
+    environment: producao       # aprovação manual obrigatória
+    # Só roda em push de tag v*.*.*
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./scripts/deploy-producao.sh ${{ github.ref_name }}
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}

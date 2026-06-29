@@ -1,0 +1,53 @@
+# exemplos/cap-12/github-actions.yml
+name: CI/CD — Code Review Agent
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validacao:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - run: pip install -r requirements.txt
+
+      - name: Lint
+        run: ruff check . && ruff format --check .
+
+      - name: Type check
+        run: mypy . --ignore-missing-imports
+
+      - name: Testes unitários
+        run: pytest tests/unit -v --tb=short
+
+      - name: Testes de integração
+        run: pytest tests/integration -v -m integration --tb=short
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY_STAGING }}
+
+  deploy-staging:
+    needs: validacao
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          docker build -t code-review-agent:${{ github.sha }} .
+          docker tag code-review-agent:${{ github.sha }} code-review-agent:latest
+
+      - name: Deploy para staging
+        run: ./scripts/deploy-staging.sh ${{ github.sha }}
+
+      - name: Smoke test
+        run: python scripts/smoke_test.py ${{ secrets.STAGING_URL }}

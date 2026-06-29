@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "harness-engineering-na-pratica"
+version = "1.0.0"
+requires-python = ">=3.11"
+dependencies = [
+    "anthropic>=0.40.0",
+    "pydantic>=2.0",
+    "structlog>=24.0",
+    "opentelemetry-api>=1.28.0",
+    "opentelemetry-sdk>=1.28.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["exemplos/cap-04", "exemplos/cap-11"]
+markers = [
+    "integration: testes que exigem ANTHROPIC_API_KEY",
+    "golden: testes de regressão com fixtures de saída",
+]
