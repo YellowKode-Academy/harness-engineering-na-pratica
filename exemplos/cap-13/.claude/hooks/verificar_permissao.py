@@ -1,28 +1,27 @@
 # .claude/hooks/verificar_permissao.py
-import sys
+# Hook PreToolUse (cap. 13): bloqueia comandos destrutivos antes de o agente executar.
+# O livro mostra a saída em JSON com "decision". Para bloquear em qualquer versão do Claude Code,
+# este hook sai com código 2: o comando não roda e o motivo (stderr) volta para o agente.
 import json
+import sys
 
-evento = json.loads(sys.stdin.read())
-tool_name = evento.get("tool_name", "")
-tool_input = str(evento.get("tool_input", ""))
+sys.stderr.reconfigure(encoding="utf-8")
 
-# Comandos que nunca devem ser executados pelo agente automaticamente
 BLOQUEADOS = [
     "rm -rf",
     "git push --force",
+    "git push -f",
     "DROP TABLE",
     "DELETE FROM",
-    "git checkout main",  # não deve mudar de branch
+    "git checkout main",
 ]
 
-for cmd_bloqueado in BLOQUEADOS:
-    if cmd_bloqueado in tool_input:
-        print(json.dumps({
-            "decision": "block",
-            "reason": f"comando bloqueado por política de segurança: '{cmd_bloqueado}'"
-        }))
-        sys.exit(0)
+evento = json.loads(sys.stdin.read() or "{}")
+tool_input = json.dumps(evento.get("tool_input", ""), ensure_ascii=False)
 
-print(json.dumps({"decision": "allow"}))
-# Output (quando bloqueado): {"decision": "block", "reason": "comando bloqueado: 'rm -rf'"}
-# Output (quando permitido): {"decision": "allow"}
+for comando in BLOQUEADOS:
+    if comando.lower() in tool_input.lower():
+        print(f"comando bloqueado por política de segurança: '{comando}'", file=sys.stderr)
+        sys.exit(2)
+
+sys.exit(0)
