@@ -1,0 +1,14 @@
+[project]
+name = "{{ cookiecutter.slug }}"
+version = "0.1.0"
+description = "{{ cookiecutter.descricao }}"
+authors = [{ name = "{{ cookiecutter.autor }}" }]
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+markers = ["integration: testes que exigem ANTHROPIC_API_KEY"]
+
+[tool.ruff]
+line-length = 130

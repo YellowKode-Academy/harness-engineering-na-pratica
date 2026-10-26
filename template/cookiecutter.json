@@ -1,0 +1,10 @@
+{
+  "slug": "meu-agente",
+  "descricao": "Descrição do agente",
+  "autor": "Seu Nome",
+  "modelo_principal": "claude-sonnet-4-6",
+  "budget_tokens_por_exec": "10000",
+  "max_chamadas_por_minuto": "10",
+  "__pacote": "{{ cookiecutter.slug.lower().replace('-', '_').replace(' ', '_') }}",
+  "_copy_without_render": [".github/workflows/*"]
+}
