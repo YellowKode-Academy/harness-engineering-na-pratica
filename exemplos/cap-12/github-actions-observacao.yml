@@ -1,0 +1,13 @@
+# exemplos/cap-12/github-actions-observacao.yml
+  monitorar-pos-deploy:
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Aguardar estabilização (5 minutos)
+        run: sleep 300
+      - name: Verificar métricas pós-deploy
+        run: python scripts/monitorar_deploy.py --janela-minutos 5
+        env:
+          METRICAS_URL: ${{ vars.METRICAS_URL }}
+          STAGING_URL: ${{ vars.STAGING_URL }}
