@@ -1,6 +1,6 @@
 # Harness Engineering na Prática com Python
 
-Repositório companion do livro **Harness Engineering na Prática com Python** — Vol. 8 da série *IA na Prática*, de Kelvin Baumhardt Biffi (YellowKode Academy).
+Repositório companion do livro **Harness Engineering na Prática com Python** — Livro 6 da série *IA na Prática*, de Kelvin Baumhardt Biffi (YellowKode Academy).
 
 ## O que é Harness Engineering?
 
@@ -26,10 +26,11 @@ exemplos/
 ├── cap-10/    Budget, Rate Limiter, Audit Log JSONL
 ├── cap-11/    Testes: unit, integration, adversarial, golden
 ├── cap-12/    CI/CD: GitHub Actions, smoke test, deploy
-├── cap-13/    Claude Code hooks e configuração MCP
+├── cap-13/    Claude Code: CLAUDE.md, settings.json, hooks e .mcp.json
 ├── cap-14/    HarnessAgent: template com as 6 camadas integradas
 └── _shared/   Stubs e utilities compartilhados entre capítulos
-code_review_agent/  Pacote do Code Review Agent completo
+code_review_agent/  Ponto de partida do Code Review Agent (gere o projeto completo com o template)
+template/           Cookiecutter do cap. 14 e do Apêndice C: projeto novo com as 6 camadas prontas
 ```
 
 ## Instalação
@@ -47,13 +48,27 @@ export ANTHROPIC_API_KEY="sk-ant-..."
 export GITHUB_TOKEN="ghp_..."     # opcional, para exemplos de GitHub
 ```
 
-## Testes
-
-### Sem API key (18 testes, roda localmente):
+## Template para um agente novo (cap. 14 e Apêndice C)
 
 ```bash
-pytest exemplos/cap-04/test_tool_definitions.py exemplos/cap-11/tests/unit/ -v
+pip install cookiecutter
+cookiecutter gh:YellowKode-Academy/harness-engineering-na-pratica --directory template
+cd <slug>
+pip install -r requirements.txt
+pytest tests/unit -v
 ```
+
+O projeto gerado já passa nos testes unitários, no lint e no teste de fumaça em Docker. Você implementa o `build_system_prompt`, as tools, o `OutputModel` e, se precisar, o `_chamar_modelo_com_retry`.
+
+## Testes
+
+### Sem API key (roda localmente):
+
+```bash
+pytest
+```
+
+Sem `ANTHROPIC_API_KEY`, os testes de integração são pulados (aparecem como `s`), não reprovados.
 
 ### Com API key (testes de integração):
 

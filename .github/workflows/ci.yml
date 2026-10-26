@@ -29,6 +29,19 @@ jobs:
       - run: pip install -r requirements.txt
       - run: pytest exemplos/cap-04/test_tool_definitions.py exemplos/cap-11/tests/unit/ -v
 
+  template:
+    name: Template (gera um projeto e roda os testes dele)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install cookiecutter ruff
+      - run: cookiecutter --no-input template --output-dir /tmp/gerado slug=agente-de-teste
+      - run: pip install -r /tmp/gerado/agente-de-teste/requirements.txt
+      - run: cd /tmp/gerado/agente-de-teste && ruff check . && pytest tests/unit -v && python scripts/smoke_test.py
+
   integration:
     name: Integration Tests (com API key)
     runs-on: ubuntu-latest
